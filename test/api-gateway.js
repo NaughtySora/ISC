@@ -67,7 +67,7 @@ describe('ApiGateway', async () => {
       name: 'Simple',
     });
     const id = randomUUID();
-    const path = query('/method', { id });
+    const path = query('/method', { id, });
     const head = await gateway.head(path);
     const post = await gateway.post(path, {
       body: json({ id, name: 'abc' }),
