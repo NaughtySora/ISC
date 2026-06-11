@@ -2,7 +2,8 @@
 
 const { describe, it, before, after } = require("node:test");
 const { randomUUID } = require("node:crypto");
-const { http: { query, }, reflection, logger } = require("naughty-util");
+const { http: { query, }, reflection,
+  logger, async } = require("naughty-util");
 const http = require('./server.js');
 const { ApiGateway } = require('../main');
 const assert = require("node:assert/strict");
@@ -52,6 +53,10 @@ describe('ApiGateway', async () => {
           storage.delete(id);
         },
         '/method:head': async () => { },
+        '/slow:get': async () => {
+          await async.pause(3000);
+          return { slow: true };
+        }
       }
     });
   });
@@ -95,7 +100,7 @@ describe('ApiGateway', async () => {
   await it('global parser', async () => {
     const gateway = new ApiGateway({
       baseurl: 'http://localhost:3000',
-      name: 'Parser',
+      name: 'Global parser',
       parser: async (res) => {
         return await res.arrayBuffer();
       },
@@ -106,5 +111,56 @@ describe('ApiGateway', async () => {
       body: json({ id }),
     });
     assert.ok(isArrayBuffer(post));
+  });
+
+  await it('parser per request', async () => {
+    const gateway = new ApiGateway({
+      baseurl: 'http://localhost:3000',
+      name: 'Request parser',
+    });
+    const id0 = randomUUID();
+    const payload0 = { id: id0 };
+    const path0 = query('/method', { id: id0 });
+    const post0 = await gateway.post(path0, {
+      body: json(payload0),
+    });
+    assert.deepEqual(post0, payload0);
+
+    const id1 = randomUUID();
+    const payload1 = { id: id1 };
+    const path1 = query('/method', { id: id1 });
+    const post1 = await gateway.post(path1, {
+      body: json(payload1),
+      parser: async (res) => {
+        return await res.arrayBuffer();
+      },
+    });
+    assert.ok(isArrayBuffer(post1));
+  });
+
+  await it('timeout | signal', async () => {
+    const gateway0 = new ApiGateway({
+      baseurl: 'http://localhost:3000',
+      name: 'Timeout',
+      timeout: 1000,
+    });
+    await assert
+      .rejects(
+        async () => gateway0.get('/slow'),
+        {
+          message: 'The operation was aborted due to timeout'
+        }
+      );
+    const gateway1 = new ApiGateway({
+      baseurl: 'http://localhost:3000',
+      name: 'Timeout',
+    });
+    await assert
+      .rejects(
+        async () => gateway1.get('/slow', { signal: AbortSignal.timeout(500) }),
+        {
+          message: 'The operation was aborted due to timeout'
+        }
+      );
   });
 });
