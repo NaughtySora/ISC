@@ -60,14 +60,14 @@ export class HmacSignature {
 
 type JSONStringifyable = any;
 
-interface ISCSignaturePayload {
-  path: string;
-  method: string;
-  body?: JSONStringifyable;
-}
+type ISCSignatureOptions = HmacSignatureOptions & { skew: number };
 
 export class ISCSignature {
-  constructor(options: HmacSignatureOptions, skew: number)
-  sign(payload: ISCSignaturePayload): [hash: string, ts: string];
-  verify(payload: ISCSignaturePayload, signature: string): void;
+  constructor(options: ISCSignatureOptions);
+  sign(path: string, method: string,
+    body?: JSONStringifyable): { hash: string, ts: string };
+  verify(
+    payload: [path: string, method: string, ts: string, body?: JSONStringifyable,],
+    signature: string
+  ): void;
 }
