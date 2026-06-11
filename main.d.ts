@@ -1,3 +1,5 @@
+import { createHmac } from "node:crypto";
+
 type ParserFn = (response: Response) => Promise<any>;
 type JSONParser = (response: Response) => Promise<string>;
 
@@ -42,4 +44,18 @@ export class ApiGateway<GlobalParser extends ParserFn = JSONParser> {
     (path: string, options?: PostOptions<P>): RequestResult<P>;
   head<P extends ParserFn = GlobalParser>
     (path: string, options?: GetOptions<P>): RequestResult<P>;
+}
+
+interface HmacSignatureOptions {
+  algo: string;
+  secret: Buffer<ArrayBuffer>;
+  encoding?: BufferEncoding;
+}
+
+export class HmacSignature {
+  constructor(options: HmacSignatureOptions);
+  sign(payload: string): string;
+  verify(payload: string, signature: string): void;
+  algo: string;
+  encoding: BufferEncoding;
 }

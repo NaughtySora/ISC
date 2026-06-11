@@ -1,6 +1,6 @@
 'use strict';
 
-const { describe, it, before, after, only } = require("node:test");
+const { describe, it, before, after } = require("node:test");
 const { randomUUID } = require("node:crypto");
 const { http: { query, }, reflection,
   logger, async } = require("naughty-util");
