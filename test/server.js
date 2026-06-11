@@ -4,6 +4,7 @@ const {
   stream,
   http: { CODES, parseURL },
   async,
+  logger: log,
 } = require('naughty-util');
 const { createServer } = require('node:http');
 
@@ -19,7 +20,7 @@ module.exports = () => {
   let server = null;
   let stopping = false;
   return {
-    async start({ api, logger = console, port, debug = false }) {
+    async start({ api, logger = log, port, debug = false }) {
       if (server !== null) return;
       server = createServer(async (req, res) => {
         if (stopping) {
@@ -37,8 +38,11 @@ module.exports = () => {
             send(res, fromCode(CODES.notFound));
             return;
           }
-          const body = req.body ? await stream.utf8(req.body) : undefined;
-          const processed = await api[key]({ body, search: url.searchParams });
+          const body = await stream.utf8(req);
+          const processed = await api[key]({
+            body: body ? JSON.parse(body) : null,
+            search: url.searchParams,
+          });
           if (processed) {
             res.writeHead(CODES.ok, TYPE_JSON);
             send(res, processed);
@@ -47,6 +51,7 @@ module.exports = () => {
             res.end();
           }
         } catch (e) {
+          if (debug) logger.error(e);
           if (!res.writable || res.writableEnded) return;
           if (!res.headersSent) res.writeHead(CODES.badRequest, TYPE_JSON);
           send(res, fromCode(CODES.badRequest));
@@ -61,7 +66,7 @@ module.exports = () => {
       const close = async.promisify(server.close.bind(server));
       try {
         server.closeIdleConnections();
-        await Promise.race([server.close(), async.reject(ms)]);
+        await Promise.race([close(), async.reject(ms)]);
       } catch (err) {
         logger.error(err);
         server.closeAllConnections();
