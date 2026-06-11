@@ -1,11 +1,12 @@
 'use strict';
 
-const { describe, it, before, after } = require("node:test");
+const { describe, it, before, after, only } = require("node:test");
 const { randomUUID } = require("node:crypto");
 const { http: { query, }, reflection,
   logger, async } = require("naughty-util");
 const http = require('./server.js');
-const { ApiGateway } = require('../main');
+const { ApiGateway, } = require('../main');
+const { NetworkError } = require('../lib/ApiGateway.js');
 const assert = require("node:assert/strict");
 const { isArrayBuffer } = require("node:util/types");
 
@@ -162,5 +163,46 @@ describe('ApiGateway', async () => {
           message: 'The operation was aborted due to timeout'
         }
       );
+  });
+
+  await it('skip body parsing', async () => {
+    const gateway = new ApiGateway({
+      baseurl: 'http://localhost:3000',
+      name: 'Skip body',
+    });
+    const id = randomUUID();
+    const payload = { id };
+    const path = query('/method', { id });
+    const post = await gateway.post(path, {
+      body: json(payload),
+      parseBody: false,
+    });
+    assert.ok(post === null);
+  });
+
+  await it('request fail', async () => {
+    const name = 'Failed';
+    const baseurl = 'http://localhost:3000';
+    const pathname = '/no-method';
+    const gateway = new ApiGateway({ baseurl, name, });
+    const path = query(pathname);
+    const error = new NetworkError(
+      `ApiGateway ${name} request failed`,
+      {
+        method: 'GET',
+        code: 404,
+        status: 'Not Found',
+        url: `${baseurl}${pathname}`,
+        details: {
+          code: 404,
+          message: 'Not Found',
+        },
+      },
+    );
+    try {
+      await gateway.get(path)
+    } catch (e) {
+      assert.deepEqual(e, error);
+    }
   });
 });
