@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "exports": "./main.js",
+  "types": "./main.d.ts",
+  "author": "NaughtySora <naughtysora@proton.me>",
+  "description": "ISC nodejs",
+  "keywords": [
+    "nodejs",
+    "ISC",
+    "services",
+    "signature",
+    "hmac",
+    "communication"
+  ],
+  "scripts": {
+    "test": "c8 node test/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.3",
+    "typescript": "^6.0.3"
+  }
+}
