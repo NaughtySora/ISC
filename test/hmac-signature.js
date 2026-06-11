@@ -23,10 +23,10 @@ describe('HmacSignature', () => {
     assert.notEqual(s0, s1);
     assert.throws(() => {
       signature1.verify(json0, s0);
-    }, { message: "invalid Signature" });
+    }, { message: "payload and signature are not equal" });
     assert.throws(() => {
       signature1.verify(json0);
-    }, { message: "Signature is valid" });
+    }, { message: "invalid signature" });
     signature1.verify(json0, s1);
   });
 

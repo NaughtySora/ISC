@@ -1,5 +1,3 @@
-import { createHmac } from "node:crypto";
-
 type ParserFn = (response: Response) => Promise<any>;
 type JSONParser = (response: Response) => Promise<string>;
 
@@ -58,4 +56,18 @@ export class HmacSignature {
   verify(payload: string, signature: string): void;
   algo: string;
   encoding: BufferEncoding;
+}
+
+type JSONStringifyable = any;
+
+interface ISCSignaturePayload {
+  path: string;
+  method: string;
+  body?: JSONStringifyable;
+}
+
+export class ISCSignature {
+  constructor(options: HmacSignatureOptions, skew: number)
+  sign(payload: ISCSignaturePayload): [hash: string, ts: string];
+  verify(payload: ISCSignaturePayload, signature: string): void;
 }
