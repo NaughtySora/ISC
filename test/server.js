@@ -16,11 +16,11 @@ const fromCode = code => ({
   message: CODES[code],
 });
 
-module.exports = () => {
+module.exports = ({ logger = log, debug = false } = {}) => {
   let server = null;
   let stopping = false;
   return {
-    async start({ api, logger = log, port, debug = false }) {
+    async start({ api, port, }) {
       if (server !== null) return;
       server = createServer(async (req, res) => {
         if (stopping) {
