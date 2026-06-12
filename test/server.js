@@ -58,7 +58,7 @@ module.exports = ({ logger = log, debug = false } = {}) => {
         }
       });
       server.listen(port, "0.0.0.0");
-      logger.log(`http server started on port: ${port}`);
+      logger.info(`http server started on port: ${port}`);
     },
     async stop(ms = 5000) {
       if (server === null || stopping) return;
@@ -74,6 +74,7 @@ module.exports = ({ logger = log, debug = false } = {}) => {
         server = null;
         stopping = false;
       }
+      logger.info('http server stopped');
     },
   }
 };

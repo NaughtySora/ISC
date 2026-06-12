@@ -3,7 +3,7 @@
 const { describe, it, before, after } = require("node:test");
 const { randomUUID } = require("node:crypto");
 const { http: { query, }, logger } = require("naughty-util");
-const http = require('./server.js');
+const server = require('./server.js');
 const { ApiGateway, } = require('../main');
 const { NetworkError } = require('../lib/ApiGateway.js');
 const assert = require("node:assert/strict");
@@ -12,26 +12,26 @@ const api = require("./api.js");
 
 const json = JSON.stringify;
 
+const HTTP_PORT = 3000;
+const HTTP_HOST = 'http://localhost';
+const baseurl = () => `${HTTP_HOST}:${HTTP_PORT}`;
+
 describe('ApiGateway', async () => {
   let stopServer = null;
 
   await before(async () => {
-    const { start, stop } = http({ debug: true, });
-    stopServer = stop;
-    await start({
-      port: 3000,
-      api: api(),
-    });
+    const http = server({ debug: true, });
+    stopServer = http.stop;
+    await http.start({ port: 3000, api: api(), });
   });
 
   await after(async () => {
     await stopServer(1000);
-    logger.log('server stopped');
   });
 
   await it('Basic usage - all method', async () => {
     const gateway = new ApiGateway({
-      baseurl: 'http://localhost:3000',
+      baseurl: baseurl(),
       name: 'Simple',
     });
     const id = randomUUID();
@@ -62,7 +62,7 @@ describe('ApiGateway', async () => {
 
   await it('global parser', async () => {
     const gateway = new ApiGateway({
-      baseurl: 'http://localhost:3000',
+      baseurl: baseurl(),
       name: 'Global parser',
       parser: async (res) => {
         return await res.arrayBuffer();
@@ -78,7 +78,7 @@ describe('ApiGateway', async () => {
 
   await it('parser per request', async () => {
     const gateway = new ApiGateway({
-      baseurl: 'http://localhost:3000',
+      baseurl: baseurl(),
       name: 'Request parser',
     });
     const id0 = randomUUID();
@@ -103,7 +103,7 @@ describe('ApiGateway', async () => {
 
   await it('timeout | signal', async () => {
     const gateway0 = new ApiGateway({
-      baseurl: 'http://localhost:3000',
+      baseurl: baseurl(),
       name: 'Timeout',
       timeout: 1000,
     });
@@ -115,7 +115,7 @@ describe('ApiGateway', async () => {
         }
       );
     const gateway1 = new ApiGateway({
-      baseurl: 'http://localhost:3000',
+      baseurl: baseurl(),
       name: 'Timeout',
     });
     await assert
@@ -129,7 +129,7 @@ describe('ApiGateway', async () => {
 
   await it('skip body parsing', async () => {
     const gateway = new ApiGateway({
-      baseurl: 'http://localhost:3000',
+      baseurl: baseurl(),
       name: 'Skip body',
     });
     const id = randomUUID();
@@ -144,9 +144,9 @@ describe('ApiGateway', async () => {
 
   await it('request fail', async () => {
     const name = 'Failed';
-    const baseurl = 'http://localhost:3000';
+    const url = baseurl();
     const pathname = '/no-method';
-    const gateway = new ApiGateway({ baseurl, name, });
+    const gateway = new ApiGateway({ baseurl: url, name, });
     const path = query(pathname);
     const error = new NetworkError(
       `ApiGateway ${name} request failed`,
@@ -154,7 +154,7 @@ describe('ApiGateway', async () => {
         method: 'GET',
         code: 404,
         status: 'Not Found',
-        url: `${baseurl}${pathname}`,
+        url: `${url}${pathname}`,
         details: {
           code: 404,
           message: 'Not Found',

@@ -2,8 +2,9 @@
 
 const { describe, it, before, after } = require("node:test");
 const { randomUUID, randomBytes } = require("node:crypto");
-const { http: { query, }, logger } = require("naughty-util");
-const http = require('./server.js');
+const { http: { query, }, logger, async } = require("naughty-util");
+const server = require('./server.js');
+const proxy = require('./auth-proxy.js');
 const { ISCGateway, ISCSignature } = require('../main');
 const { NetworkError } = require('../lib/ApiGateway.js');
 const assert = require("node:assert/strict");
@@ -12,33 +13,41 @@ const api = require("./api.js");
 
 const json = JSON.stringify;
 
-describe.only('ISCGateway', async () => {
-  let stopServer = null;
+const HTTP_PORT = 3000;
+const HTTP_HOST = 'http://localhost';
+const PROXY_PORT = 1337;
 
+const baseurl = () => `${HTTP_HOST}:${HTTP_PORT}`;
+const proxyUrl = () => `${HTTP_HOST}:${PROXY_PORT}`;
+
+describe.only('ISCGateway', async () => {
+  let stopHttp = null;
+  let stopAuth = null;
+  const signature = new ISCSignature({
+    algo: 'sha256',
+    secret: randomBytes(32),
+    skew: 60,
+  });
   await before(async () => {
-    const { start, stop } = http({ debug: true, });
-    stopServer = stop;
-    await start({
-      port: 3000,
-      api: api()
-    });
+    const http = server({ debug: true, });
+    const auth = proxy({ port: PROXY_PORT, signature });
+    stopHttp = http.stop;
+    stopAuth = auth.stop;
+    await http.start({ port: HTTP_PORT, api: api(), });
+    await auth.start({ port: HTTP_PORT, host: 'localhost', });
   });
 
   await after(async () => {
-    await stopServer(1000);
-    logger.log('server stopped');
+    await stopAuth(1000);
+    await stopHttp(1000);
   });
 
   await it('Basic usage - all method', async () => {
-    const signature = new ISCSignature({
-      algo: 'sha256',
-      secret: randomBytes(32),
-      skew: 60,
-    });
-    const options = { baseurl: 'http://localhost:3000', name: 'Simple', };
+    const options = { baseurl: proxyUrl(), name: 'Simple', };
     const gateway = new ISCGateway(options, signature);
     const id = randomUUID();
     const path = query('/method', { id, });
-    const head = await gateway.head(path);
+    const post = await gateway.post(path, { body: JSON.stringify({ b: 1 }) });
+    const get = await gateway.get(path);
   });
 });
