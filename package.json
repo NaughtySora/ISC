@@ -22,5 +22,12 @@
   "dependencies": {
     "c8": "^11.0.0",
     "naughty-util": "^0.7.0"
+  },
+  "c8": {
+    "exclude": [
+      "internal/**",
+      "main.js",
+      "test/**"
+    ]
   }
 }

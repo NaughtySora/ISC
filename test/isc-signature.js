@@ -66,9 +66,9 @@ describe('ISCSignature', () => {
       assert.match(e.cause.message, /invalid timestamp/);
     }
     try {
-      signature.verify([path, method], s.signature);
+      signature.verify([path, method, undefined], s.signature);
     } catch (e) {
-      assert.match(e.cause.message, /invalid payload length/);
+      assert.match(e.cause.message, /invalid timestamp/);
     }
   });
 
@@ -87,9 +87,15 @@ describe('ISCSignature', () => {
     } catch (e) {
       assert.match(e.cause.message, /invalid payload length/);
     }
+
+    try {
+      signature.verify([path, method], s.signature)
+    } catch (e) {
+      assert.match(e.cause.message, /invalid payload length/);
+    }
   });
 
-  it('invalid payload', () => {
+  it('invalid signature', () => {
     const signature = new ISCSignature({
       algo: 'sha256',
       secret: randomBytes(32),
@@ -109,6 +115,17 @@ describe('ISCSignature', () => {
     } catch (e) {
       assert.match(e.cause.message, /invalid signature/);
     }
+  });
+
+  it('getters', () => {
+    const signature = new ISCSignature({
+      secret: randomBytes(32),
+      algo: 'sha256',
+      skew: 60,
+    });
+    assert.equal(signature.algo, 'sha256');
+    assert.equal(signature.encoding, 'base64');
+    assert.equal(signature.skew, 60);
   });
 
 });
