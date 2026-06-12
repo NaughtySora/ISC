@@ -1,7 +1,7 @@
 type ParserFn = (response: Response) => Promise<any>;
 type JSONParser = (response: Response) => Promise<string>;
 
-interface Options<P extends ParserFn = JSONParser> {
+interface ApiGatewayOptions<P extends ParserFn = JSONParser> {
   baseurl: string;
   timeout?: number;
   name?: string;
@@ -27,7 +27,7 @@ type GetOptions<Parser extends ParserFn>
   = Omit<RequestOptions<Parser>, "method" | "path" | "parseBody">;
 
 export class ApiGateway<GlobalParser extends ParserFn = JSONParser> {
-  constructor(options: Options<GlobalParser>);
+  constructor(options: ApiGatewayOptions<GlobalParser>);
   request<P extends ParserFn = GlobalParser>
     (options: RequestOptions<P>): RequestResult<P>;
   post<P extends ParserFn = GlobalParser>
