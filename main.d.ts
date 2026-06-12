@@ -65,7 +65,7 @@ type ISCSignatureOptions = HmacSignatureOptions & { skew: number };
 export class ISCSignature {
   constructor(options: ISCSignatureOptions);
   sign(path: string, method: string,
-    body?: JSONStringifyable): { hash: string, ts: string };
+    body?: JSONStringifyable): { signature: string, ts: string };
   verify(
     payload: [path: string, method: string, ts: string, body?: JSONStringifyable,],
     signature: string
