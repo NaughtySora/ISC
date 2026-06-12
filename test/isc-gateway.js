@@ -20,7 +20,7 @@ const PROXY_PORT = 1337;
 const baseurl = () => `${HTTP_HOST}:${HTTP_PORT}`;
 const proxyUrl = () => `${HTTP_HOST}:${PROXY_PORT}`;
 
-describe.only('ISCGateway', async () => {
+describe('ISCGateway', async () => {
   let stopHttp = null;
   let stopAuth = null;
   const signature = new ISCSignature({

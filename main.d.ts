@@ -70,6 +70,9 @@ export class ISCSignature {
     payload: [path: string, method: string, ts: string, body?: JSONStringifyable,],
     signature: string
   ): void;
+  algo: string;
+  encoding: BufferEncoding;
+  skew: number;
 }
 
 export class ISCGateway<GlobalParser extends ParserFn = JSONParser>
