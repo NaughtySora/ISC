@@ -5,7 +5,7 @@ const { describe, it, mock } = require("node:test");
 const assert = require("node:assert/strict");
 const { ISCSignature } = require('../main');
 
-describe.only('ISCSignature', () => {
+describe('ISCSignature', () => {
   it('sign/verify with body', () => {
     const signature = new ISCSignature({
       algo: 'sha256',
@@ -31,7 +31,7 @@ describe.only('ISCSignature', () => {
     signature.verify([path, method, s.ts], s.signature);
   });
 
-  it.only('expired', (context) => {
+  it('expired', (context) => {
     const signature = new ISCSignature({
       algo: 'sha256',
       secret: randomBytes(32),
@@ -46,12 +46,69 @@ describe.only('ISCSignature', () => {
     try {
       signature.verify([path, method, s.ts], s.signature);
     } catch (e) {
-      assert.equal(e.cause.message, 'Signature is expired')
+      assert.match(e.cause.message, /signature is expired/);
     }
   });
 
-  //TODO: 
-  // invalid ts, 
-  // invalid payload / length, 
-  // invalid signature
+  it('invalid ts', () => {
+    const signature = new ISCSignature({
+      algo: 'sha256',
+      secret: randomBytes(32),
+      skew: 60,
+    });
+    const path = '/method?abc=1';
+    const method = 'GET';
+    const s = signature.sign(path, method);
+    signature.verify([path, method, s.ts], s.signature);
+    try {
+      signature.verify([path, method, 'test'], s.signature);
+    } catch (e) {
+      assert.match(e.cause.message, /invalid timestamp/);
+    }
+    try {
+      signature.verify([path, method], s.signature);
+    } catch (e) {
+      assert.match(e.cause.message, /invalid payload length/);
+    }
+  });
+
+  it('invalid payload', () => {
+    const signature = new ISCSignature({
+      algo: 'sha256',
+      secret: randomBytes(32),
+      skew: 60,
+    });
+    const path = '/method?abc=1';
+    const method = 'GET';
+    const s = signature.sign(path, method);
+    signature.verify([path, method, s.ts], s.signature);
+    try {
+      signature.verify({ path, method, ts: s.ts }, s.signature);
+    } catch (e) {
+      assert.match(e.cause.message, /invalid payload length/);
+    }
+  });
+
+  it('invalid payload', () => {
+    const signature = new ISCSignature({
+      algo: 'sha256',
+      secret: randomBytes(32),
+      skew: 60,
+    });
+    const path = '/method?abc=1';
+    const method = 'GET';
+    const s = signature.sign(path, method);
+    signature.verify([path, method, s.ts], s.signature);
+    try {
+      signature.verify([path, method, s.ts], 1234);
+    } catch (e) {
+      assert.match(e.cause.message, /invalid signature/);
+    }
+    try {
+      signature.verify([path, method, s.ts], Buffer.from('12346'));
+    } catch (e) {
+      assert.match(e.cause.message, /invalid signature/);
+    }
+  });
+
 });
