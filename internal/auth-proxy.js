@@ -5,7 +5,6 @@ const { logger: log, http: { CODES },
 const { request, createServer } = require('node:http');
 const { PassThrough } = require('node:stream');
 
-const TYPE_TEXT = { 'content-type': 'text/plain' };
 const TYPE_JSON = { 'content-type': 'application/json' };
 
 const fromCode = code => ({
@@ -21,8 +20,8 @@ module.exports = ({ logger = log, port, signature } = {}) => {
       if (server !== null) return;
       server = createServer(async (req, res) => {
         if (stopping) {
-          res.writeHead(CODES.serviceUnavailable, TYPE_TEXT);
-          res.end(CODES.serviceUnavailable);
+          res.writeHead(CODES.serviceUnavailable, TYPE_JSON);
+          res.end(fromCode(CODES.serviceUnavailable));
           return;
         }
         const tee0 = PassThrough();
@@ -58,8 +57,8 @@ module.exports = ({ logger = log, port, signature } = {}) => {
         });
         proxyReq.on('error', err => {
           logger.error(err);
-          res.writeHead(CODES.badGateway, TYPE_TEXT);
-          res.end('Bad Gateway: Unable to connect to upstream server.');
+          res.writeHead(CODES.badGateway, TYPE_JSON);
+          res.end(fromCode(CODES.badGateway,));
         });
         tee1.pipe(proxyReq);
       });

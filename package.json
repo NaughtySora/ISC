@@ -17,10 +17,10 @@
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "c8": "^11.0.0"
   },
   "dependencies": {
-    "c8": "^11.0.0",
     "naughty-util": "^0.7.0"
   },
   "c8": {

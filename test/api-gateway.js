@@ -26,7 +26,11 @@ describe('ApiGateway', async () => {
   });
 
   await after(async () => {
-    await stopServer(1000);
+    try {
+      await stopServer(1000);
+    } catch (e) {
+      logger.error(e);
+    }
   });
 
   await it('Basic usage - all method', async () => {
