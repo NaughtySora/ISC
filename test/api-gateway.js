@@ -1,14 +1,14 @@
 'use strict';
 
-const { describe, it, before, after } = require("node:test");
-const { randomUUID } = require("node:crypto");
-const { http: { query, }, logger } = require("naughty-util");
+const { describe, it, before, after } = require('node:test');
+const { randomUUID } = require('node:crypto');
+const { http: { query, }, logger } = require('naughty-util');
 const server = require('../internal/server.js');
 const { ApiGateway, } = require('../main');
 const { NetworkError } = require('../lib/ApiGateway.js');
-const assert = require("node:assert/strict");
-const { isArrayBuffer } = require("node:util/types");
-const api = require("../internal/api.js");
+const assert = require('node:assert/strict');
+const { isArrayBuffer } = require('node:util/types');
+const api = require('../internal/api.js');
 
 const json = JSON.stringify;
 

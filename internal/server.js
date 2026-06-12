@@ -57,7 +57,7 @@ module.exports = ({ logger = log, debug = false } = {}) => {
           send(res, fromCode(CODES.badRequest));
         }
       });
-      server.listen(port, "0.0.0.0");
+      server.listen(port, '0.0.0.0');
       logger.info(`http server started on port: ${port}`);
     },
     async stop(ms = 5000) {

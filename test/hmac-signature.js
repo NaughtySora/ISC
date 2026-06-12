@@ -1,8 +1,8 @@
 'use strict';
 
-const { randomBytes } = require("node:crypto");
-const { describe, it } = require("node:test");
-const assert = require("node:assert/strict");
+const { randomBytes } = require('node:crypto');
+const { describe, it } = require('node:test');
+const assert = require('node:assert/strict');
 const { HmacSignature } = require('../main');
 
 describe('HmacSignature', () => {
@@ -23,10 +23,10 @@ describe('HmacSignature', () => {
     assert.notEqual(s0, s1);
     assert.throws(() => {
       signature1.verify(json0, s0);
-    }, { message: "payload and signature are not equal" });
+    }, { message: 'payload and signature are not equal' });
     assert.throws(() => {
       signature1.verify(json0);
-    }, { message: "invalid signature" });
+    }, { message: 'invalid signature' });
     signature1.verify(json0, s1);
   });
 

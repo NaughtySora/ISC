@@ -1,15 +1,15 @@
 'use strict';
 
-const { describe, it, before, after } = require("node:test");
-const { randomUUID, randomBytes } = require("node:crypto");
-const { http: { query, }, logger, async } = require("naughty-util");
+const { describe, it, before, after } = require('node:test');
+const { randomUUID, randomBytes } = require('node:crypto');
+const { http: { query, }, logger, async } = require('naughty-util');
 const server = require('../internal/server.js');
 const proxy = require('../internal/auth-proxy');
 const { ISCGateway, ISCSignature } = require('../main');
 const { NetworkError } = require('../lib/ApiGateway.js');
-const assert = require("node:assert/strict");
-const { isArrayBuffer } = require("node:util/types");
-const api = require("../internal/api.js");
+const assert = require('node:assert/strict');
+const { isArrayBuffer } = require('node:util/types');
+const api = require('../internal/api.js');
 
 const json = JSON.stringify;
 

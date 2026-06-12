@@ -1,6 +1,6 @@
 'use strict';
 
-const { async } = require("naughty-util");
+const { async } = require('naughty-util');
 
 module.exports = () => {
   const storage = new Map();

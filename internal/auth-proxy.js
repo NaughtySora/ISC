@@ -62,7 +62,7 @@ module.exports = ({ logger = log, port, signature } = {}) => {
         });
         tee1.pipe(proxyReq);
       });
-      server.listen(port, "0.0.0.0");
+      server.listen(port, '0.0.0.0');
       logger.info(`http proxy started on port: ${port}`);
     },
     async stop(ms = 5000) {

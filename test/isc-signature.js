@@ -1,8 +1,8 @@
 'use strict';
 
-const { randomBytes } = require("node:crypto");
-const { describe, it, mock } = require("node:test");
-const assert = require("node:assert/strict");
+const { randomBytes } = require('node:crypto');
+const { describe, it, mock } = require('node:test');
+const assert = require('node:assert/strict');
 const { ISCSignature } = require('../main');
 
 describe('ISCSignature', () => {
