@@ -2,13 +2,13 @@
 
 const { describe, it, before, after } = require("node:test");
 const { randomUUID } = require("node:crypto");
-const { http: { query, }, reflection,
-  logger, async } = require("naughty-util");
+const { http: { query, }, logger } = require("naughty-util");
 const http = require('./server.js');
 const { ApiGateway, } = require('../main');
 const { NetworkError } = require('../lib/ApiGateway.js');
 const assert = require("node:assert/strict");
 const { isArrayBuffer } = require("node:util/types");
+const api = require("./api.js");
 
 const json = JSON.stringify;
 
@@ -16,49 +16,11 @@ describe('ApiGateway', async () => {
   let stopServer = null;
 
   await before(async () => {
-    const storage = new Map();
     const { start, stop } = http({ debug: true, });
     stopServer = stop;
     await start({
       port: 3000,
-      api: {
-        '/method:get': async ({ search }) => {
-          const id = search.get('id');
-          if (!id) return;
-          return storage.get(id);
-        },
-        '/method:post': async ({ body, search }) => {
-          const id = search.get('id');
-          if (!id) return;
-          storage.set(id, body);
-          return body;
-        },
-        '/method:put': async ({ body, search }) => {
-          const id = search.get('id');
-          if (!id) return;
-          if (!storage.has(id)) return;
-          storage.set(id, body);
-        },
-        '/method:patch': async ({ body, search }) => {
-          const id = search.get('id');
-          if (!id) return;
-          const data = storage.get(id);
-          if (!data) return;
-          const updated = Object.assign({}, data, body);
-          storage.set(id, updated);
-          return updated;
-        },
-        '/method:delete': async ({ search }) => {
-          const id = search.get('id');
-          if (!id) return;
-          storage.delete(id);
-        },
-        '/method:head': async () => { },
-        '/slow:get': async () => {
-          await async.pause(3000);
-          return { slow: true };
-        }
-      }
+      api: api(),
     });
   });
 

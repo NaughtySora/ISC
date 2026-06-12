@@ -71,3 +71,8 @@ export class ISCSignature {
     signature: string
   ): void;
 }
+
+export class ISCGateway<GlobalParser extends ParserFn = JSONParser>
+  extends ApiGateway<GlobalParser> {
+  constructor(options: ApiGatewayOptions<GlobalParser>, signature: ISCSignature);
+}
